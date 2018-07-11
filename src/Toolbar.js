@@ -14,11 +14,11 @@ class Toolbar extends Component {
             <i className={`${this.props.someSelected && !this.props.allSelected ? 'fa fa-minus-square-o' : this.props.allSelected ? 'fa fa-check-square-o' : 'fa fa-square-o'}`}></i>
           </button>
 
-          <button onClick={() => this.props.markAsRead('read')} className="btn btn-default" disabled={this.props.someSelected ? '' : 'disabled'}>
+          <button onClick={() => this.props.markAsRead(true)} className="btn btn-default" disabled={this.props.someSelected ? '' : 'disabled'}>
             Mark As Read
           </button>
 
-          <button onClick={() => this.props.markAsRead('unread')} className="btn btn-default" disabled={this.props.someSelected ? '' : 'disabled'}>
+          <button onClick={() => this.props.markAsRead(false)} className="btn btn-default" disabled={this.props.someSelected ? '' : 'disabled'}>
             Mark As Unread
           </button>
 

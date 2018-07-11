@@ -111,37 +111,21 @@ class App extends Component {
   }
 
   bulkSelect = () => {
-    if (this.state.allSelected === true) {
-      this.state.messages.map(message => message.selected = false)
+    const value = this.state.allSelected ? false : true
+      this.state.messages.map(message => message.selected = value)
       this.setState({
-        allSelected: false,
+        allSelected: value,
         messages: this.state.messages,
-        someSelected: false
+        someSelected: value
       })
-    } else if (this.state.allSelected === false) {
-      this.state.messages.map(message => message.selected = true)
-      this.setState({
-        allSelected: true,
-        messages: this.state.messages,
-        someSelected: true
-      })
-    }
   }
 
   markAsRead = (value) => {
-    if (value === 'read') {
-      const readAndSelected = this.state.messages.filter(message => message.read === false && message.selected === true)
-      readAndSelected.forEach(message => message.read = true)
+      const selected = this.state.messages.filter(message => message.selected === true)
+      selected.forEach(message => message.read = value)
       this.setState({
         messages: this.state.messages
       })
-    } else if (value === 'unread') {
-      const readAndSelected = this.state.messages.filter(message => message.read === true && message.selected === true)
-      readAndSelected.forEach(message => message.read = false)
-      this.setState({
-        messages: this.state.messages
-      })
-    }
   }
 
   delete = () => {
