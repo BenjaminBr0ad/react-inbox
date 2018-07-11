@@ -25,25 +25,27 @@ class App extends Component {
     return this.state.messages.filter(terms)
   }
 
-  setMessages = async (message, id, command, property) => {
-    console.log(message);
-    let obj = {
-      messageIds: [id],
-      command: command,
-      [property]: message
-    }
-    console.log(obj);
-    const response = await fetch(API, {
-      method: 'PATCH',
-      body: JSON.stringify(obj),
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+  setMessages = async (value, id, command, property) => {
+    if (id) {
+      let obj = {
+        messageIds: id,
+        command: command,
+        [property]: value
       }
-    })
-    const messages = await response.json()
-    console.log(messages);
-    this.setState({messages: messages})
+      console.log(obj);
+      const response = await fetch(API, {
+        method: 'PATCH',
+        body: JSON.stringify(obj),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      })
+      const messages = await response.json()
+      this.setState({messages: messages})
+    } else {
+      this.setState({messages: this.state.messages})
+    }
   }
 
   allSelected = () => {
@@ -62,17 +64,17 @@ class App extends Component {
  // ----- Main functionality of the inbox.
   clickStar = (id) => {
     const message = this.filterMessages(message => message.id === id)[0]
-    const newMessage = message.starred ? message.starred = false : message.starred = true
+    const value = message.starred ? message.starred = false : message.starred = true
 
-    this.setMessages(newMessage, id, 'star', 'starred')
+    this.setMessages(value, [id], 'star', 'starred')
   }
 
   checkbox = (id) => {
     const message = this.filterMessages(message => message.id === id)[0]
-    message.selected ? message.selected = false : message.selected = true
-    this.setMessages()
+    const value = message.selected ? message.selected = false : message.selected = true
     this.someSelected()
     this.allSelected()
+    this.setMessages()
   }
 
   bulkSelect = () => {
@@ -84,8 +86,9 @@ class App extends Component {
 
   markAsRead = (value) => {
       const selected = this.filterMessages(message => message.selected)
+      let id = selected.map(message => message.id)
       selected.forEach(message => message.read = value)
-      this.setMessages()
+      this.setMessages(value, id, 'read', 'read')
   }
 
   deleteMessage = () => {
