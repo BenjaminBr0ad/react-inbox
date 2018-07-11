@@ -69,95 +69,85 @@ class App extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      messages: messages,
-      allSelected: false,
-      someSelected: true
+      messages: messages
     }
   }
+  // ----- Convenience functions to replace verbose code / called within other functions.
+  filterMessages = (terms) => {
+    return this.state.messages.filter(terms)
+  }
 
+  setMessages = () => {
+    this.setState({messages: this.state.messages})
+  }
+  allSelected = () => {
+    let value = false
+    const selected = this.filterMessages(message => message.selected === true)
+    value = selected.length === this.state.messages.length ? true : false
+    return value
+  }
+
+  someSelected = () => {
+    let value = true
+    const selected = this.filterMessages(message => message.selected === true)
+    selected.length > 0 ? value = true : value = false
+    return value
+  }
+ // ----- Main functionality of the inbox.
   clickStar = (id) => {
-    for (let elem of this.state.messages) {
-      if (elem.id === id) {
-        elem.starred ? elem.starred = false : elem.starred = true
-        this.setState({
-          messages: this.state.messages
-        })
-      }
-    }
+    const message = this.filterMessages(message => message.id === id)[0]
+    message.starred ? message.starred = false : message.starred = true
+    this.setMessages()
   }
 
   checkbox = (id) => {
-    const messages = this.state.messages.filter(message => message.id === id)[0]
-    messages.selected ? messages.selected = false : messages.selected = true
-    this.setState({messages: this.state.messages})
-
-    const someSelected = this.state.messages.filter(message => message.selected === true)
-    if (someSelected.length >=1) {
-      this.setState({
-        someSelected: true
-      })
-    } else {
-      this.setState({
-        someSelected: false
-      })
-    }
-
-    if (this.state.allSelected === true) {
-      this.setState({
-        allSelected: false,
-        someSelected: true
-      })
-    }
+    const message = this.filterMessages(message => message.id === id)[0]
+    message.selected ? message.selected = false : message.selected = true
+    this.setMessages()
+    this.someSelected()
+    this.allSelected()
   }
 
   bulkSelect = () => {
-    const value = this.state.allSelected ? false : true
-      this.state.messages.map(message => message.selected = value)
-      this.setState({
-        allSelected: value,
-        messages: this.state.messages,
-        someSelected: value
-      })
+    const value = this.allSelected() ? false : true
+      this.state.messages.forEach(message => message.selected = value)
+      this.setMessages()
+      this.someSelected()
   }
 
   markAsRead = (value) => {
-      const selected = this.state.messages.filter(message => message.selected === true)
+      const selected = this.filterMessages(message => message.selected === true)
       selected.forEach(message => message.read = value)
-      this.setState({
-        messages: this.state.messages
-      })
+      this.setMessages()
   }
 
-  delete = () => {
-    const selected = this.state.messages.filter(message => !message.selected)
+  deleteMessage = () => {
+    const selected = this.filterMessages(message => !message.selected)
+    this.setMessages()
     this.setState({
       messages: selected,
-      someSelected: false
     })
   }
 
   unreadCount = () => {
-    const unreadMessages = this.state.messages.filter(message => message.read === false)
+    const unreadMessages = this.filterMessages(message => message.read === false)
     return unreadMessages.length
   }
 
   changeLabel = (e, value) => {
-    if (e.target.value === 'Apply label') {
+    const selectedMessages = this.filterMessages(message => message.selected)
 
-    } else if (value === 'apply') {
-      const selectedMessages = this.state.messages.filter(message => message.selected)
-      const unlabeledMessages = selectedMessages.filter(message => !message.labels.includes(e.target.value))
-      unlabeledMessages.map(message => message.labels.push(e.target.value))
-      this.setState({
-        messages: this.state.messages
-      })
+    if (value === 'apply') {
+      selectedMessages
+        .filter(message => !message.labels.includes(e.target.value))
+        .forEach(message => message.labels.push(e.target.value))
+      this.setMessages()
+
     } else if (value === 'remove') {
-      const selectedMessages2 = this.state.messages.filter(message => message.selected)
-      const labeledMessages = selectedMessages2.filter(message => message.labels.includes(e.target.value))
-      labeledMessages.map(message => message.labels.splice(message.labels.indexOf(e.target.value),1))
-      this.setState({
-        messages: this.state.messages
-      })
+      selectedMessages
+        .filter(message => message.labels.includes(e.target.value))
+        .forEach(message => message.labels.splice(message.labels.indexOf(e.target.value),1))
+      this.setMessages()
     }
   }
 
@@ -166,10 +156,10 @@ class App extends Component {
       <div className="App container">
         <Toolbar
           bulkSelect={this.bulkSelect}
-          allSelected={this.state.allSelected}
-          someSelected={this.state.someSelected}
+          allSelected={this.allSelected}
+          someSelected={this.someSelected}
           markAsRead={this.markAsRead}
-          delete={this.delete}
+          deleteMessage={this.deleteMessage}
           unreadCount={this.unreadCount}
           changeLabel={this.changeLabel}
         />
