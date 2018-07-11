@@ -3,101 +3,68 @@ import './App.css'
 import Toolbar from './Toolbar'
 import MessageList from './MessageList'
 
-const messages = [
-  {
-    "id": 1,
-    "subject": "You can't input the protocol without calculating the mobile RSS protocol!",
-    "read": false,
-    "starred": true,
-    "labels": ["dev", "personal"]
-  },
-  {
-    "id": 2,
-    "subject": "connecting the system won't do anything, we need to input the mobile AI panel!",
-    "read": false,
-    "starred": false,
-    "selected": true,
-    "labels": []
-  },
-  {
-    "id": 3,
-    "subject": "Use the 1080p HTTP feed, then you can parse the cross-platform hard drive!",
-    "read": false,
-    "starred": true,
-    "labels": ["dev"]
-  },
-  {
-    "id": 4,
-    "subject": "We need to program the primary TCP hard drive!",
-    "read": true,
-    "starred": false,
-    "selected": true,
-    "labels": []
-  },
-  {
-    "id": 5,
-    "subject": "If we override the interface, we can get to the HTTP feed through the virtual EXE interface!",
-    "read": false,
-    "starred": false,
-    "labels": ["personal"]
-  },
-  {
-    "id": 6,
-    "subject": "We need to back up the wireless GB driver!",
-    "read": true,
-    "starred": true,
-    "labels": []
-  },
-  {
-    "id": 7,
-    "subject": "We need to index the mobile PCI bus!",
-    "read": true,
-    "starred": false,
-    "labels": ["dev", "personal"]
-  },
-  {
-    "id": 8,
-    "subject": "If we connect the sensor, we can get to the HDD port through the redundant IB firewall!",
-    "read": true,
-    "starred": true,
-    "labels": []
-  }
-]
 
+const API = 'http://localhost:8082/api/messages'
 class App extends Component {
 
   constructor(props) {
     super(props)
     this.state = {
-      messages: messages
+      messages: []
     }
   }
+
+  async componentDidMount() {
+    const response = await fetch(API)
+    const json = await response.json()
+    this.setState({messages:json})
+  }
+
   // ----- Convenience functions to replace verbose code / called within other functions.
   filterMessages = (terms) => {
     return this.state.messages.filter(terms)
   }
 
-  setMessages = () => {
-    this.setState({messages: this.state.messages})
+  setMessages = async (message, id, command, property) => {
+    console.log(message);
+    let obj = {
+      messageIds: [id],
+      command: command,
+      [property]: message
+    }
+    console.log(obj);
+    const response = await fetch(API, {
+      method: 'PATCH',
+      body: JSON.stringify(obj),
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
+    const messages = await response.json()
+    console.log(messages);
+    this.setState({messages: messages})
   }
+
   allSelected = () => {
     let value = false
-    const selected = this.filterMessages(message => message.selected === true)
+    const selected = this.filterMessages(message => message.selected)
     value = selected.length === this.state.messages.length ? true : false
     return value
   }
 
   someSelected = () => {
     let value = true
-    const selected = this.filterMessages(message => message.selected === true)
+    const selected = this.filterMessages(message => message.selected)
     selected.length > 0 ? value = true : value = false
     return value
   }
  // ----- Main functionality of the inbox.
   clickStar = (id) => {
     const message = this.filterMessages(message => message.id === id)[0]
-    message.starred ? message.starred = false : message.starred = true
-    this.setMessages()
+    const newMessage = message.starred ? message.starred = false : message.starred = true
+
+    this.setMessages(newMessage, id, 'star', 'starred')
   }
 
   checkbox = (id) => {
@@ -116,7 +83,7 @@ class App extends Component {
   }
 
   markAsRead = (value) => {
-      const selected = this.filterMessages(message => message.selected === true)
+      const selected = this.filterMessages(message => message.selected)
       selected.forEach(message => message.read = value)
       this.setMessages()
   }
@@ -130,7 +97,7 @@ class App extends Component {
   }
 
   unreadCount = () => {
-    const unreadMessages = this.filterMessages(message => message.read === false)
+    const unreadMessages = this.filterMessages(message => !message.read)
     return unreadMessages.length
   }
 
