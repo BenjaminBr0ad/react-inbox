@@ -13,6 +13,7 @@ const MessageList = ({messages, clickStar, checkbox}) => (
         starred={message.starred}
         selected={message.selected}
         labels={message.labels}
+        body={message.body}
         clickStar={clickStar}
         checkbox={checkbox}
       />

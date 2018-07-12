@@ -18,7 +18,8 @@ class App extends Component {
   async componentDidMount() {
     const response = await fetch(API)
     const json = await response.json()
-    this.setState({messages:json})
+    console.log(json);
+    this.setState({messages:json.reverse()})
   }
 
   setMessages = async (idArray, command, property, value) => {
@@ -36,7 +37,7 @@ class App extends Component {
       }
     })
     const messages = await response.json()
-    this.setState({messages: messages})
+    this.setState({messages: messages.reverse()})
   }
 
   filterMessages = (terms) => {
@@ -132,7 +133,7 @@ class App extends Component {
       }
     })
     const messages = await response.json()
-    this.setState({messages: [...this.state.messages, messages]})
+    this.setState({messages: [messages, ...this.state.messages]})
     this.toggleCompose()
   }
 
