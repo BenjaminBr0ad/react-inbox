@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Toolbar = ({bulkSelect, allSelected, someSelected, markAsRead, deleteMessage, unreadCount, changeLabel}) => (
+const Toolbar = ({bulkSelect, allSelected, someSelected, markAsRead, deleteMessage, unreadCount, changeLabel, toggleCompose}) => (
 
   <div className="row toolbar">
     <div className="col-md-12">
@@ -8,6 +8,10 @@ const Toolbar = ({bulkSelect, allSelected, someSelected, markAsRead, deleteMessa
         <span className="badge badge">{unreadCount()}</span>
         unread messages
       </p>
+
+      <a onClick={toggleCompose} className="btn btn-danger">
+        <i className="fa fa-plus"></i>
+      </a>
 
       <button
         onClick={bulkSelect}
@@ -19,7 +23,7 @@ const Toolbar = ({bulkSelect, allSelected, someSelected, markAsRead, deleteMessa
       <button
         onClick={() => markAsRead(true)}
         className="btn btn-default"
-        disabled={someSelected ? '' : 'disabled'}
+        disabled={someSelected() ? '' : 'disabled'}
       >
         Mark As Read
       </button>
@@ -27,7 +31,7 @@ const Toolbar = ({bulkSelect, allSelected, someSelected, markAsRead, deleteMessa
       <button
         onClick={() => markAsRead(false)}
         className="btn btn-default"
-        disabled={someSelected ? '' : 'disabled'}
+        disabled={someSelected() ? '' : 'disabled'}
       >
         Mark As Unread
       </button>
@@ -35,7 +39,7 @@ const Toolbar = ({bulkSelect, allSelected, someSelected, markAsRead, deleteMessa
       <select
         onChange={(e) => {changeLabel(e, 'apply'); e.target.selectedIndex = 0}}
         className="form-control label-select"
-        disabled={someSelected ? '' : 'disabled'}
+        disabled={someSelected() ? '' : 'disabled'}
       >
         <option>Apply label</option>
         <option value="dev">dev</option>
@@ -46,7 +50,7 @@ const Toolbar = ({bulkSelect, allSelected, someSelected, markAsRead, deleteMessa
       <select
         onChange={(e) => {changeLabel(e, 'remove'); e.target.selectedIndex = 0}}
         className="form-control label-select"
-        disabled={someSelected ? '' : 'disabled'}
+        disabled={someSelected() ? '' : 'disabled'}
       >
         <option>Remove label</option>
         <option value="dev">dev</option>
@@ -57,7 +61,7 @@ const Toolbar = ({bulkSelect, allSelected, someSelected, markAsRead, deleteMessa
       <button
         onClick={deleteMessage}
         className="btn btn-default"
-        disabled={someSelected ? '' : 'disabled'}
+        disabled={someSelected() ? '' : 'disabled'}
       >
         <i className="fa fa-trash-o"></i>
       </button>

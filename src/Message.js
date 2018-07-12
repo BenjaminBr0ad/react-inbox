@@ -6,7 +6,10 @@ const Message = ({id, subject, read, starred, selected, labels, clickStar, check
     <div className="col-xs-1">
       <div className="row">
         <div className="col-xs-2">
-          <input type="checkbox" onChange={() => checkbox(id)} checked={`${selected ? 'checked' : ''}`}/>
+          <input type="checkbox"
+            onChange={() => checkbox(id)}
+            checked={`${selected ? 'checked' : ''}`}
+          />
         </div>
         <div className="col-xs-2">
           <i
@@ -18,7 +21,14 @@ const Message = ({id, subject, read, starred, selected, labels, clickStar, check
     </div>
     <div className="col-xs-11">
       {labels.map((label, i) => {
-        return <span key={i} className="label label-warning">{label}</span>
+        return (
+          <span
+            key={i}
+            className="label label-warning"
+          >
+            {label}
+          </span>
+        )
       })}
       <a href="#">
         {subject}

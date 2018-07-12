@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import './App.css'
 import Toolbar from './Toolbar'
 import MessageList from './MessageList'
-
+import ComposeForm from './ComposeForm'
 
 const API = 'http://localhost:8082/api/messages'
 class App extends Component {
@@ -10,7 +10,8 @@ class App extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      messages: []
+      messages: [],
+      composeForm: false
     }
   }
 
@@ -20,32 +21,26 @@ class App extends Component {
     this.setState({messages:json})
   }
 
-  // ----- Convenience functions to replace verbose code / called within other functions.
-  filterMessages = (terms) => {
-    return this.state.messages.filter(terms)
+  setMessages = async (idArray, command, property, value) => {
+    let obj = {
+      messageIds: idArray,
+      command: command,
+      [property]: value,
+    }
+    const response = await fetch(API, {
+      method: 'PATCH',
+      body: JSON.stringify(obj),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    })
+    const messages = await response.json()
+    this.setState({messages: messages})
   }
 
-  setMessages = async (value, id, command, property) => {
-    if (id) {
-      let obj = {
-        messageIds: id,
-        command: command,
-        [property]: value
-      }
-      console.log(obj);
-      const response = await fetch(API, {
-        method: 'PATCH',
-        body: JSON.stringify(obj),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
-      })
-      const messages = await response.json()
-      this.setState({messages: messages})
-    } else {
-      this.setState({messages: this.state.messages})
-    }
+  filterMessages = (terms) => {
+    return this.state.messages.filter(terms)
   }
 
   allSelected = () => {
@@ -56,47 +51,44 @@ class App extends Component {
   }
 
   someSelected = () => {
-    let value = true
+    let value = false
     const selected = this.filterMessages(message => message.selected)
     selected.length > 0 ? value = true : value = false
     return value
   }
- // ----- Main functionality of the inbox.
+
   clickStar = (id) => {
     const message = this.filterMessages(message => message.id === id)[0]
     const value = message.starred ? message.starred = false : message.starred = true
-
-    this.setMessages(value, [id], 'star', 'starred')
+    this.setMessages([id], 'star', 'starred', value)
   }
 
   checkbox = (id) => {
     const message = this.filterMessages(message => message.id === id)[0]
     const value = message.selected ? message.selected = false : message.selected = true
+    this.setMessages([id], 'select', 'selected', value)
     this.someSelected()
     this.allSelected()
-    this.setMessages()
   }
 
   bulkSelect = () => {
     const value = this.allSelected() ? false : true
-      this.state.messages.forEach(message => message.selected = value)
-      this.setMessages()
-      this.someSelected()
+    const idArray = this.filterMessages(message => message.selected !== value)
+      .map(message => message.id)
+    this.setMessages(idArray, 'select', 'selected', value)
+    this.someSelected()
   }
 
   markAsRead = (value) => {
       const selected = this.filterMessages(message => message.selected)
-      let id = selected.map(message => message.id)
+      let selectedIds = selected.map(message => message.id)
       selected.forEach(message => message.read = value)
-      this.setMessages(value, id, 'read', 'read')
+      this.setMessages(selectedIds, 'read', 'read', value)
   }
 
   deleteMessage = () => {
-    const selected = this.filterMessages(message => !message.selected)
-    this.setMessages()
-    this.setState({
-      messages: selected,
-    })
+    const deletedIds = this.filterMessages(message => message.selected).map(message => message.id)
+    this.setMessages(deletedIds, 'delete', 'selected', false)
   }
 
   unreadCount = () => {
@@ -108,17 +100,44 @@ class App extends Component {
     const selectedMessages = this.filterMessages(message => message.selected)
 
     if (value === 'apply') {
-      selectedMessages
+      const idArray = selectedMessages
         .filter(message => !message.labels.includes(e.target.value))
-        .forEach(message => message.labels.push(e.target.value))
-      this.setMessages()
+        .map(message => message.id)
+      this.setMessages(idArray, 'addLabel', 'label', e.target.value)
 
     } else if (value === 'remove') {
-      selectedMessages
+      const idArray = selectedMessages
         .filter(message => message.labels.includes(e.target.value))
-        .forEach(message => message.labels.splice(message.labels.indexOf(e.target.value),1))
-      this.setMessages()
+        .map(message => message.id)
+      this.setMessages(idArray, 'removeLabel', 'label', e.target.value)
     }
+  }
+
+  toggleCompose = () => {
+    this.setState({composeForm: this.state.composeForm ? false : true})
+  }
+
+  composeMessage = async (e) => {
+    e.preventDefault()
+    let obj = {
+      subject: this.state.subject,
+      body: this.state.body
+    }
+    const response = await fetch(API, {
+      method: 'POST',
+      body: JSON.stringify(obj),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    })
+    const messages = await response.json()
+    this.setState({messages: [...this.state.messages, messages]})
+    this.toggleCompose()
+  }
+
+  handleFormChange = (e) => {
+    this.setState({[e.target.name]: e.target.value})
   }
 
   render() {
@@ -132,7 +151,9 @@ class App extends Component {
           deleteMessage={this.deleteMessage}
           unreadCount={this.unreadCount}
           changeLabel={this.changeLabel}
+          toggleCompose={this.toggleCompose}
         />
+        {this.state.composeForm ? <ComposeForm composeMessage={this.composeMessage} handleFormChange={this.handleFormChange}/> : <div></div>}
         <MessageList
           messages={this.state.messages}
           clickStar={this.clickStar}
