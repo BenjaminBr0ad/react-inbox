@@ -11,13 +11,13 @@ const ComposeForm = ({composeMessage, handleFormChange}) => (
     <div className="form-group">
       <label htmlFor="subject" className="col-sm-2 control-label">Subject</label>
       <div className="col-sm-8">
-        <input onChange={(e) => handleFormChange(e)} type="text" className="form-control" id="subject" placeholder="Enter a subject" name="subject"/>
+        <input onChange={(e) => handleFormChange(e)} type="text" className="form-control" id="subject" placeholder="Enter a subject" name="subject" required/>
       </div>
     </div>
     <div className="form-group">
       <label htmlFor="body" className="col-sm-2 control-label">Body</label>
       <div className="col-sm-8">
-        <textarea onChange={(e) => handleFormChange(e)} name="body" id="body" className="form-control"></textarea>
+        <textarea onChange={(e) => handleFormChange(e)} name="body" id="body" className="form-control" required></textarea>
       </div>
     </div>
     <div className="form-group">

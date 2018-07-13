@@ -18,7 +18,6 @@ class App extends Component {
   async componentDidMount() {
     const response = await fetch(API)
     const json = await response.json()
-    console.log(json);
     this.setState({messages:json.reverse()})
   }
 
@@ -80,11 +79,15 @@ class App extends Component {
     this.someSelected()
   }
 
-  markAsRead = (value) => {
-      const selected = this.filterMessages(message => message.selected)
-      let selectedIds = selected.map(message => message.id)
-      selected.forEach(message => message.read = value)
-      this.setMessages(selectedIds, 'read', 'read', value)
+  markAsRead = (value, id) => {
+      if (id) {
+        this.setMessages([id], 'read', 'read', value)
+      } else {
+        const selected = this.filterMessages(message => message.selected)
+        let selectedIds = selected.map(message => message.id)
+        selected.forEach(message => message.read = value)
+        this.setMessages(selectedIds, 'read', 'read', value)
+      }
   }
 
   deleteMessage = () => {
@@ -159,6 +162,7 @@ class App extends Component {
           messages={this.state.messages}
           clickStar={this.clickStar}
           checkbox={this.checkbox}
+          markAsRead={this.markAsRead}
         />
       </div>
     )

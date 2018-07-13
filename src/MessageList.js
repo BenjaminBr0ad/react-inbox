@@ -1,21 +1,16 @@
 import React from 'react'
 import Message from './Message'
 
-const MessageList = ({messages, clickStar, checkbox}) => (
+const MessageList = ({messages, clickStar, checkbox, markAsRead}) => (
 
   <div>
     {messages.map(message =>
       <Message
+        message={message}
         key={message.id}
-        id={message.id}
-        subject={message.subject}
-        read={message.read}
-        starred={message.starred}
-        selected={message.selected}
-        labels={message.labels}
-        body={message.body}
         clickStar={clickStar}
         checkbox={checkbox}
+        markAsRead={markAsRead}
       />
     )}
   </div>
